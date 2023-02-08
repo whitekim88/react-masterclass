@@ -1,16 +1,16 @@
 import { Link, useRouteMatch } from 'react-router-dom';
 import styled from 'styled-components';
-import { motion, useAnimation, useScroll } from 'framer-motion';
-import { useEffect } from 'react';
-import Search from '../Routes/Search';
+import { motion } from 'framer-motion';
+import { useState } from 'react';
 
-const Nav = styled(motion.nav)`
+const Nav = styled.nav`
   display: flex;
   justify-content: space-between;
   align-items: center;
   position: fixed;
   width: 100%;
   top: 0;
+  background-color: black;
   font-size: 14px;
   padding: 20px 60px;
   color: white;
@@ -50,16 +50,32 @@ const Item = styled.li`
   }
 `;
 
+const Search = styled.span`
+  color: white;
+  display: flex;
+  align-items: center;
+  position: relative;
+  svg {
+    height: 25px;
+  }
+`;
+
 const Circle = styled(motion.span)`
   position: absolute;
   width: 5px;
   height: 5px;
-  border-radius: 2.5px;
+  border-radius: 5px;
   bottom: -5px;
   left: 0;
   right: 0;
   margin: 0 auto;
   background-color: ${(props) => props.theme.red};
+`;
+
+const Input = styled(motion.input)`
+  transform-origin: right center;
+  position: absolute;
+  left: -150px;
 `;
 
 const logoVariants = {
@@ -74,31 +90,13 @@ const logoVariants = {
   },
 };
 
-const navVariants = {
-  top: {
-    backgroundColor: 'rgba(0, 0, 0, 0)',
-  },
-  scroll: {
-    backgroundColor: 'rgba(0, 0, 0, 1)',
-  },
-};
-
 function Header() {
+  const [searchOpen, setSearchOpen] = useState(false);
   const homeMatch = useRouteMatch('/');
   const tvMatch = useRouteMatch('/tv');
-  const navAnimation = useAnimation();
-  const { scrollY } = useScroll();
-  useEffect(() => {
-    scrollY.onChange(() => {
-      if (scrollY.get() > 80) {
-        navAnimation.start('scroll');
-      } else {
-        navAnimation.start('top');
-      }
-    });
-  }, [scrollY, navAnimation]);
+  const toggleSearch = () => setSearchOpen((prev) => !prev);
   return (
-    <Nav variants={navVariants} animate={navAnimation} initial={'top'}>
+    <Nav>
       <Col>
         <Logo
           variants={logoVariants}
@@ -113,15 +111,39 @@ function Header() {
         </Logo>
         <Items>
           <Item>
-            <Link to='/'>Home {homeMatch?.isExact && <Circle />}</Link>
+            <Link to='/'>
+              Home {homeMatch?.isExact && <Circle layoutId='circle' />}
+            </Link>
           </Item>
           <Item>
-            <Link to='/tv'>Tv Shows {tvMatch && <Circle />}</Link>
+            <Link to='/tv'>
+              Tv Shows {tvMatch && <Circle layoutId='circle' />}
+            </Link>
           </Item>
         </Items>
       </Col>
       <Col>
-        <Search></Search>
+        <Search>
+          <motion.svg
+            onClick={toggleSearch}
+            animate={{ x: searchOpen ? -180 : 0 }}
+            transition={{ type: 'linear' }}
+            fill='currentColor'
+            viewBox='0 0 20 20'
+            xmlns='http://www.w3.org/2000/svg'
+          >
+            <path
+              fillRule='evenodd'
+              d='M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z'
+              clipRule='evenodd'
+            ></path>
+          </motion.svg>
+          <Input
+            transition={{ type: 'linear' }}
+            animate={{ scaleX: searchOpen ? 1 : 0 }}
+            placeholder='Search for movie or tv Show'
+          />
+        </Search>
       </Col>
     </Nav>
   );
