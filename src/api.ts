@@ -32,6 +32,7 @@ export interface Result {
 }
 
 export function getMovies(): Promise<IMovieResult> {
+  console.log(111)
   return fetch(`${BASE_PATH}movie/now_playing?api_key=${API_KEY}`).then((response) => response.json())
 }
 
