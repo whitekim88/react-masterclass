@@ -1,6 +1,7 @@
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion, useScroll } from 'framer-motion';
 import { useState } from 'react';
 import { useQuery } from 'react-query';
+import { useHistory, useRouteMatch } from 'react-router-dom';
 import styled from 'styled-components';
 import { getMovies, IMovieResult } from '../api';
 import useWindowDimensions from '../Components/useWindowDimensions';
@@ -60,11 +61,69 @@ const Box = styled(motion.div)<{ bgPhoto: string }>`
   height: 200px;
   color: red;
   font-size: 66px;
+  cursor: pointer;
+  &:first-child {
+    transform-origin: center left;
+  }
+  &:last-child {
+    transform-origin: center right;
+  }
 `;
+
+const Info = styled(motion.div)`
+  padding: 20px;
+  background-color: ${(props) => props.theme.black.lighter};
+  opacity: 0;
+  position: absolute;
+  width: 100%;
+  bottom: 0;
+  color: white;
+  h4 {
+    text-align: center;
+    font-size: 18px;
+  }
+`;
+const infoVariants = {
+  hover: {
+    opacity: 1,
+    transition: {
+      delay: 0.5,
+      duaration: 0.1,
+      type: 'tween',
+    },
+  },
+};
 
 const offset = 6;
 
+const boxVariants = {
+  normal: {
+    scale: 1,
+  },
+  hover: {
+    scale: 1.3,
+    y: -50,
+    transition: {
+      delay: 0.5,
+      duration: 0.3,
+      type: 'tween',
+    },
+  },
+};
+
+const Overlay = styled(motion.div)`
+  position: fixed;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+`;
+
 function Home() {
+  const history = useHistory();
+  const bigMovieMatch = useRouteMatch<{ movieId: string }>('/movies/:movieId');
+  const { scrollY } = useScroll();
   const { data, isLoading } = useQuery<IMovieResult>(
     ['movies', 'nowPlaying'],
     getMovies,
@@ -82,6 +141,10 @@ function Home() {
   };
   const toggleLeaving = () => setLeaving((prev) => !prev);
   const width = useWindowDimensions();
+  const onBoxClicked = (movieId: number) => {
+    history.push(`/movies/${movieId}`);
+  };
+  const onOverlayClick = () => history.push('/');
   return (
     <Wrapper>
       {isLoading ? (
@@ -109,13 +172,47 @@ function Home() {
                   .slice(offset * index, offset * index + offset)
                   .map((movie) => (
                     <Box
+                      layoutId={bigMovieMatch?.params.movieId}
                       key={movie.id}
+                      whileHover='hover'
+                      initial='normal'
+                      variants={boxVariants}
+                      transition={{ type: 'tween' }}
+                      onClick={() => onBoxClicked(movie.id)}
                       bgPhoto={makeImagePath(movie.backdrop_path, 'w500')}
-                    />
+                    >
+                      <Info variants={infoVariants}>
+                        <h4>{movie.title}</h4>
+                      </Info>
+                    </Box>
                   ))}
               </Row>
             </AnimatePresence>
           </Slider>
+          <AnimatePresence>
+            {bigMovieMatch ? (
+              <>
+                <Overlay
+                  onClick={onOverlayClick}
+                  exit={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                />
+                <motion.div
+                  layoutId={bigMovieMatch.params.movieId}
+                  style={{
+                    position: 'absolute',
+                    width: '40vw',
+                    height: '80vh',
+                    background: 'red',
+                    top: scrollY.get() + 100,
+                    left: 0,
+                    right: 0,
+                    margin: '0 auto',
+                  }}
+                ></motion.div>
+              </>
+            ) : null}
+          </AnimatePresence>
         </>
       )}
     </Wrapper>
