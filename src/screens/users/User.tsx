@@ -1,12 +1,18 @@
-import { useParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import { useParams, Outlet } from 'react-router-dom';
 import { users } from '../../db';
 
 function User() {
   const { userId } = useParams();
   return (
-    <h1>
-      User with is {userId} is named: {users[Number(userId) - 1].name}
-    </h1>
+    <div>
+      <h1>
+        User with is {userId} is named: {users[Number(userId) - 1].name}
+      </h1>
+      <hr />
+      <Link to='followers'>See followers</Link>
+      <Outlet />
+    </div>
   );
 }
 
