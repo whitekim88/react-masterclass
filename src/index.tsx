@@ -5,6 +5,7 @@ import App from './App';
 import { ThemeProvider } from 'styled-components';
 import { createGlobalStyle } from 'styled-components';
 import { QueryClient, QueryClientProvider } from 'react-query';
+import React from 'react';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement,
@@ -78,14 +79,14 @@ const GlobalStyle = createGlobalStyle`
 const client = new QueryClient();
 
 root.render(
-  // <React.StrictMode>
-  <RecoilRoot>
-    <QueryClientProvider client={client}>
-      <ThemeProvider theme={theme}>
-        <GlobalStyle />
-        <App />
-      </ThemeProvider>
-    </QueryClientProvider>
-  </RecoilRoot>,
-  // </React.StrictMode>
+  <React.StrictMode>
+    <RecoilRoot>
+      <QueryClientProvider client={client}>
+        <ThemeProvider theme={theme}>
+          <GlobalStyle />
+          <App />
+        </ThemeProvider>
+      </QueryClientProvider>
+    </RecoilRoot>
+  </React.StrictMode>,
 );
